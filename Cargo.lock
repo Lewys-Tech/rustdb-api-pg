@@ -998,8 +998,10 @@ name = "rustdb-api-pg"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "http-body-util",
  "sqlx",
  "tokio",
+ "tower",
 ]
 
 [[package]]
