@@ -50,3 +50,46 @@ async fn delete_removes_key(pool: PgPool) {
    let (status, _) = send(&app, Request::get("/get/city").body(Body::empty()).unwrap()).await;
     assert_eq!(status, StatusCode::NOT_FOUND); 
 }
+
+#[sqlx::test]
+async fn overwrite_replaces_value(pool: PgPool) {
+    rustdb_api_pg::init_db(&pool).await.unwrap();
+    let app = rustdb_api_pg::app(pool);
+
+    send(&app, Request::post("/set").body(Body::from("city=nairobi")).unwrap()).await;
+    send(&app, Request::post("/set").body(Body::from("city=mombasa")).unwrap()).await;
+
+    let (status, body) = send(&app, Request::get("/get/city").body(Body::empty()).unwrap()).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(body, "mombasa");
+}
+
+#[sqlx::test]
+async fn set_without_equals_returns_400(pool: PgPool) {
+    rustdb_api_pg::init_db(&pool).await.unwrap();
+    let app = rustdb_api_pg::app(pool);
+
+    let (status, _) = send(&app, Request::post("/set").body(Body::from("garbage")).unwrap()).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+}
+
+#[sqlx::test]
+async fn key_with_space_round_trips(pool: PgPool) {
+    rustdb_api_pg::init_db(&pool).await.unwrap();
+    let app = rustdb_api_pg::app(pool);
+
+    send(&app, Request::post("/set").body(Body::from("my name=lewis")).unwrap()).await;
+
+    let (status, body) = send(&app, Request::get("/get/my%20name").body(Body::empty()).unwrap()).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(body, "lewis");
+}
+
+#[sqlx::test]
+async fn delete_missing_key_returns_404(pool: PgPool) {
+    rustdb_api_pg::init_db(&pool).await.unwrap();
+    let app = rustdb_api_pg::app(pool);
+
+    let (status, _) = send(&app, Request::delete("/delete/city").body(Body::empty()).unwrap()).await;
+    assert_eq!(status, StatusCode::NOT_FOUND);
+}
