@@ -34,3 +34,19 @@ async fn get_missing_key_returns_404(pool: PgPool) {
     let (status, _) = send(&app, Request::get("/get/nothing").body(Body::empty()).unwrap()).await;
     assert_eq!(status, StatusCode::NOT_FOUND);
 }
+
+
+#[sqlx::test]
+async fn delete_removes_key(pool: PgPool) {
+    rustdb_api_pg::init_db(&pool).await.unwrap();
+    let app =rustdb_api_pg::app(pool);
+
+    let (status, _) = send(&app, Request::post("/set").body(Body::from("city=nairobi")).unwrap()).await;
+    assert_eq!(status, StatusCode::OK);
+
+    let(status, _) = send(&app, Request::delete("/delete/city").body(Body::empty()). unwrap()).await;
+    assert_eq!(status, StatusCode::NO_CONTENT);
+
+   let (status, _) = send(&app, Request::get("/get/city").body(Body::empty()).unwrap()).await;
+    assert_eq!(status, StatusCode::NOT_FOUND); 
+}
