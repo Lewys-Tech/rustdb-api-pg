@@ -7,11 +7,23 @@ This is the third version of the same API, each built to learn what the next lay
 Demo
 
 curl -i -X POST http://127.0.0.1:8080/set -d "city=nairobi"   # 200 OK
+
+
 curl http://127.0.0.1:8080/get/city                           # nairobi
+
+
 curl -X POST http://127.0.0.1:8080/set -d "city=mombasa"      # overwrites
+
+
 curl http://127.0.0.1:8080/get/city                           # mombasa
+
+
 curl -i -X DELETE http://127.0.0.1:8080/delete/city           # 204 No Content
+
+
 curl -i http://127.0.0.1:8080/get/city                        # 404 Not Found
+
+
 
 Data lives in Postgres, so it survives server restarts with no replay step.
 
@@ -20,11 +32,17 @@ Getting Started
 
 Prerequisites
 Rust (developed on 1.93)
+
+
 PostgreSQL 14 or later
 
 1. Set up Postgres (Ubuntu)
 
+
+
 sudo apt install postgresql postgresql-contrib
+
+
 sudo -u postgres psql
 
 CREATE USER lewis WITH PASSWORD 'your-password';
